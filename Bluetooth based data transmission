@@ -1,0 +1,51 @@
+# Bluetooth-based-data-transmission
+This project demonstrates wireless serial communication between two microcontrollers using Bluetooth technology.It is used in wireless sensor networks, IoT systems, and embedded applications.
+Transmitter side code
+// Transmitter Arduino code
+
+const int lm35Pin = A0;  // LM35 temperature sensor connected to A0
+
+void setup() {
+  Serial.begin(9600); // Bluetooth module communicates over Serial
+}
+
+void loop() {
+  int sensorValue = analogRead(lm35Pin);
+  float voltage = sensorValue * (5.0 / 1023.0);
+  float temperatureC = voltage * 100.0; // LM35 outputs 10mV per degree Celsius
+
+  Serial.print("Temperature: ");
+  Serial.print(temperatureC);
+  Serial.println(" C");
+
+  delay(1000); // Send data every second
+}
+Receiver side code
+// Receiver Arduino code
+
+#include <LiquidCrystal.h>
+
+// LCD pin configuration: RS, E, D4, D5, D6, D7
+LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
+
+String receivedData = "";
+
+void setup() {
+  Serial.begin(9600); // Bluetooth module connected to Serial
+  lcd.begin(16, 2);
+  lcd.print("Waiting for data");
+}
+
+void loop() {
+  if (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\n') {
+      lcd.clear();
+      lcd.print(receivedData);
+      receivedData = "";
+    } else {
+      receivedData += c;
+    }
+  }
+}
+
